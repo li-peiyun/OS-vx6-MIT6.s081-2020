@@ -105,3 +105,8 @@ uptime:
  li a7, SYS_uptime
  ecall
  ret
+.global connect
+connect:
+ li a7, SYS_connect
+ ecall
+ ret
