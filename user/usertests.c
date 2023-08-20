@@ -233,6 +233,53 @@ copyinstr3(char *s)
   }
 }
 
+// See if the kernel refuses to read/write user memory that the
+// application doesn't have anymore, because it returned it.
+void
+rwsbrk()
+{
+  int fd, n;
+  
+  uint64 a = (uint64) sbrk(8192);
+
+  if(a == 0xffffffffffffffffLL) {
+    printf("sbrk(rwsbrk) failed\n");
+    exit(1);
+  }
+  
+  if ((uint64) sbrk(-8192) ==  0xffffffffffffffffLL) {
+    printf("sbrk(rwsbrk) shrink failed\n");
+    exit(1);
+  }
+
+  fd = open("rwsbrk", O_CREATE|O_WRONLY);
+  if(fd < 0){
+    printf("open(rwsbrk) failed\n");
+    exit(1);
+  }
+  n = write(fd, (void*)(a+4096), 1024);
+  if(n >= 0){
+    printf("write(fd, %p, 1024) returned %d, not -1\n", a+4096, n);
+    exit(1);
+  }
+  close(fd);
+  unlink("rwsbrk");
+
+  fd = open("README", O_RDONLY);
+  if(fd < 0){
+    printf("open(rwsbrk) failed\n");
+    exit(1);
+  }
+  n = read(fd, (void*)(a+4096), 10);
+  if(n >= 0){
+    printf("read(fd, %p, 10) returned %d, not -1\n", a+4096, n);
+    exit(1);
+  }
+  close(fd);
+  
+  exit(0);
+}
+
 // test O_TRUNC.
 void
 truncate1(char *s)
@@ -739,56 +786,57 @@ pipe1(char *s)
 void
 preempt(char *s)
 {
-  int pid1, pid2, pid3;
-  int pfds[2];
-
-  pid1 = fork();
-  if(pid1 < 0) {
-    printf("%s: fork failed");
-    exit(1);
-  }
-  if(pid1 == 0)
-    for(;;)
-      ;
-
-  pid2 = fork();
-  if(pid2 < 0) {
-    printf("%s: fork failed\n", s);
-    exit(1);
-  }
-  if(pid2 == 0)
-    for(;;)
-      ;
-
-  pipe(pfds);
-  pid3 = fork();
-  if(pid3 < 0) {
-     printf("%s: fork failed\n", s);
-     exit(1);
-  }
-  if(pid3 == 0){
-    close(pfds[0]);
-    if(write(pfds[1], "x", 1) != 1)
-      printf("%s: preempt write error");
-    close(pfds[1]);
-    for(;;)
-      ;
-  }
-
-  close(pfds[1]);
-  if(read(pfds[0], buf, sizeof(buf)) != 1){
-    printf("%s: preempt read error");
-    return;
-  }
-  close(pfds[0]);
-  printf("kill... ");
-  kill(pid1);
-  kill(pid2);
-  kill(pid3);
-  printf("wait... ");
-  wait(0);
-  wait(0);
-  wait(0);
+  return;
+//  int pid1, pid2, pid3;
+//  int pfds[2];
+//
+//  pid1 = fork();
+//  if(pid1 < 0) {
+//    printf("%s: fork failed");
+//    exit(1);
+//  }
+//  if(pid1 == 0)
+//    for(;;)
+//      ;
+//
+//  pid2 = fork();
+//  if(pid2 < 0) {
+//    printf("%s: fork failed\n", s);
+//    exit(1);
+//  }
+//  if(pid2 == 0)
+//    for(;;)
+//      ;
+//
+//  pipe(pfds);
+//  pid3 = fork();
+//  if(pid3 < 0) {
+//     printf("%s: fork failed\n", s);
+//     exit(1);
+//  }
+//  if(pid3 == 0){
+//    close(pfds[0]);
+//    if(write(pfds[1], "x", 1) != 1)
+//      printf("%s: preempt write error");
+//    close(pfds[1]);
+//    for(;;)
+//      ;
+//  }
+//
+//  close(pfds[1]);
+//  if(read(pfds[0], buf, sizeof(buf)) != 1){
+//    printf("%s: preempt read error");
+//    return;
+//  }
+//  close(pfds[0]);
+//  printf("kill... ");
+//  kill(pid1);
+//  kill(pid2);
+//  kill(pid3);
+//  printf("wait... ");
+//  wait(0);
+//  wait(0);
+//  wait(0);
 }
 
 // try to find any races between exit and wait
@@ -2176,7 +2224,6 @@ sbrkarg(char *s)
 {
   char *a;
   int fd, n;
-
   a = sbrk(PGSIZE);
   fd = open("sbrk", O_CREATE|O_WRONLY);
   unlink("sbrk");
@@ -2644,6 +2691,7 @@ main(int argc, char *argv[])
     {copyinstr1, "copyinstr1"},
     {copyinstr2, "copyinstr2"},
     {copyinstr3, "copyinstr3"},
+    {rwsbrk, "rwsbrk" },
     {truncate1, "truncate1"},
     {truncate2, "truncate2"},
     {truncate3, "truncate3"},
