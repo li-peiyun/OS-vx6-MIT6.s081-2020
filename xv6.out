@@ -1,16 +1,16 @@
 
 xv6 kernel is booting
 
-hart 2 starting
 hart 1 starting
-page table 0x0000000087f24000
-..0: pte 0x0000000021fc8001 pa 0x0000000087f20000
-.. ..0: pte 0x0000000021fc7c01 pa 0x0000000087f1f000
-.. .. ..0: pte 0x0000000021fc841f pa 0x0000000087f21000
-.. .. ..1: pte 0x0000000021fc780f pa 0x0000000087f1e000
-.. .. ..2: pte 0x0000000021fc741f pa 0x0000000087f1d000
-..255: pte 0x0000000021fc8c01 pa 0x0000000087f23000
-.. ..511: pte 0x0000000021fc8801 pa 0x0000000087f22000
+hart 2 starting
+page table 0x0000000087f23000
+..0: pte 0x0000000021fc7c01 pa 0x0000000087f1f000
+.. ..0: pte 0x0000000021fc7801 pa 0x0000000087f1e000
+.. .. ..0: pte 0x0000000021fc801f pa 0x0000000087f20000
+.. .. ..1: pte 0x0000000021fc740f pa 0x0000000087f1d000
+.. .. ..2: pte 0x0000000021fc701f pa 0x0000000087f1c000
+..255: pte 0x0000000021fc8801 pa 0x0000000087f22000
+.. ..511: pte 0x0000000021fc8401 pa 0x0000000087f21000
 .. .. ..510: pte 0x0000000021fdd807 pa 0x0000000087f76000
 .. .. ..511: pte 0x0000000020001c0b pa 0x0000000080007000
 init: starting sh
@@ -36,7 +36,17 @@ test badarg: OK
 test reparent: OK
 test twochildren: OK
 test forkfork: OK
-test forkforkfork: OK
+test forkforkfork: backtrace:
+0x0000000080003408
+0x0000000080003232
+0x0000000080002eca
+0x0000000000003abc
+backtrace:
+0x0000000080003408
+0x0000000080003232
+0x0000000080002eca
+0x0000000000003aec
+OK
 test argptest: OK
 test createdelete: OK
 test linkunlink: OK
@@ -145,7 +155,12 @@ test opentest: OK
 test writetest: OK
 test writebig: OK
 test createtest: OK
-test openiput: OK
+test openiput: backtrace:
+0x0000000080003408
+0x0000000080003232
+0x0000000080002eca
+0x0000000000003a42
+OK
 test exitiput: OK
 test iput: OK
 test mem: OK
@@ -160,4 +175,4 @@ test iref: OK
 test forktest: OK
 test bigdir: OK
 ALL TESTS PASSED
-$ qemu-system-riscv64: terminating on signal 15 from pid 10294 (make)
+$ qemu-system-riscv64: terminating on signal 15 from pid 15368 (make)
